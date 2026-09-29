@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM AI Briefing Dashboard</title>
+    <style>
+        :root {
+            --primary: #0d5bd7;
+            --primary-dark: #173d7a;
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --muted: #5f6d85;
+            --border: #dfe9f5;
+            --success: #1a8f5a;
+            --warning: #d78b1a;
+            --text: #10233d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #edf3fb 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px 48px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        .brand small {
+            display: block;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 26px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px 20px;
+            box-shadow: 0 8px 18px rgba(17, 34, 62, 0.04);
+        }
+
+        .label {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .value {
+            font-size: 34px;
+            font-weight: bold;
+            margin: 0;
+            color: var(--primary-dark);
+        }
+
+        .sub {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px 20px;
+            box-shadow: 0 8px 18px rgba(17, 34, 62, 0.04);
+        }
+
+        .chart {
+            display: grid;
+            gap: 12px;
+        }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: 180px 1fr 80px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bar-label {
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-track {
+            position: relative;
+            height: 12px;
+            border-radius: 999px;
+            background: #edf3ff;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary) 0%, #5ea2ff 100%);
+        }
+
+        .bar-value {
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 22px;
+        }
+
+        .history-panel {
+            margin-top: 28px;
+        }
+
+        .chart-shell {
+            background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 12px;
+        }
+
+        .mini-box {
+            border: 1px solid var(--border);
+            background: #f8fbff;
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .mini-box .label {
+            margin-bottom: 4px;
+        }
+
+        .mini-box strong {
+            font-size: 20px;
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 760px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bar-row {
+                grid-template-columns: 1fr;
+            }
+
+            .token-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="topbar">
+            <div class="brand">
+                CRM Intelligence
+                <small>Daily Briefing Dashboard</small>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="card">
+                <div class="label">Accounts</div>
+                <p id="totalAccounts" class="value">0</p>
+                <div class="sub">Accounts processed in this briefing run</div>
+            </div>
+            <div class="card">
+                <div class="label">Average confidence</div>
+                <p id="averageConfidence" class="value">0%</p>
+                <div class="sub">AI output confidence across all customer briefs</div>
+            </div>
+            <div class="card">
+                <div class="label">Average tokens</div>
+                <p id="averageTokens" class="value">0</p>
+                <div class="sub">Prompt plus completion usage per account</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="label">Confidence trend</div>
+            <div id="confidenceChart" class="chart"></div>
+        </div>
+
+        <div class="panel history-panel">
+            <div class="label">Historical daily trends</div>
+            <div class="chart-shell">
+                <svg id="historyChart" viewBox="0 0 820 300" width="100%" height="300" role="img"
+                    aria-label="Historical confidence and token trends"></svg>
+            </div>
+        </div>
+
+        <div class="token-grid">
+            <div class="mini-box">
+                <div class="label">Top token consumer</div>
+                <strong id="topTokenAccount">-</strong>
+            </div>
+            <div class="mini-box">
+                <div class="label">Strongest confidence</div>
+                <strong id="topConfidenceAccount">-</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            const summaryResponse = await fetch('/api/dashboard/summary');
+            const summaryData = await summaryResponse.json();
+
+            document.getElementById('totalAccounts').textContent = summaryData.totalAccounts ?? 0;
+            document.getElementById('averageConfidence').textContent = ((summaryData.averageConfidence ?? 0) * 100).toFixed(0) + '%';
+            document.getElementById('averageTokens').textContent = Math.round(summaryData.averageTokens ?? 0);
+
+            const chart = document.getElementById('confidenceChart');
+            const trend = Array.isArray(summaryData.trend) ? summaryData.trend : [];
+
+            if (!trend.length) {
+                chart.innerHTML = '<div class="sub">No briefing data available yet.</div>';
+            } else {
+                const topToken = trend.reduce((best, item) => item.tokens > best.tokens ? item : best, trend[0]);
+                const topConfidence = trend.reduce((best, item) => item.confidence > best.confidence ? item : best, trend[0]);
+
+                document.getElementById('topTokenAccount').textContent = topToken.account;
+                document.getElementById('topConfidenceAccount').textContent = topConfidence.account;
+
+                chart.innerHTML = trend.map(item => {
+                    const width = Math.max(8, Math.min(100, (item.confidence || 0) * 100));
+                    return `
+              <div class="bar-row">
+                <div class="bar-label">${item.account}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+                <div class="bar-value">${((item.confidence || 0) * 100).toFixed(0)}%</div>
+              </div>
+            `;
+                }).join('');
+            }
+
+            const historyResponse = await fetch('/api/dashboard/history');
+            const historyData = await historyResponse.json();
+            renderHistoricalChart(historyData.history || []);
+        }
+
+        function renderHistoricalChart(history) {
+            const svg = document.getElementById('historyChart');
+            if (!history || !history.length) {
+                svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#5f6d85" font-size="16">No historical trend data yet.</text>';
+                return;
+            }
+
+            const width = 820;
+            const height = 300;
+            const padding = { top: 20, right: 20, bottom: 30, left: 45 };
+            const confidenceValues = history.map(item => item.confidence * 100);
+            const tokenValues = history.map(item => item.tokens);
+            const maxConfidence = 100;
+            const maxTokens = Math.max(...tokenValues, 1);
+
+            const toX = (index) => padding.left + (index * (width - padding.left - padding.right)) / (Math.max(history.length - 1, 1));
+            const toYConfidence = (value) => height - padding.bottom - ((value - 0) / (maxConfidence - 0)) * (height - padding.top - padding.bottom);
+            const toYTokens = (value) => height - padding.bottom - ((value - 0) / (maxTokens - 0)) * (height - padding.top - padding.bottom);
+
+            const confidencePath = history.map((item, index) => `${index === 0 ? 'M' : 'L'} ${toX(index)} ${toYConfidence(item.confidence * 100)}`).join(' ');
+            const tokenPath = history.map((item, index) => `${index === 0 ? 'M' : 'L'} ${toX(index)} ${toYTokens(item.tokens)}`).join(' ');
+
+            const xAxis = history.map((item, index) => {
+                const x = toX(index);
+                const label = new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                return `<text x="${x}" y="${height - 8}" fill="#5f6d85" font-size="11" text-anchor="middle">${label}</text>`;
+            }).join('');
+
+            const yGrid = [0, 25, 50, 75, 100].map(value => {
+                const y = toYConfidence(value);
+                return `
+                    <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="#e8edf5" stroke-width="1" />
+                    <text x="8" y="${y + 4}" fill="#5f6d85" font-size="10">${value}%</text>
+                `;
+            }).join('');
+
+            svg.innerHTML = `
+                <g>
+                    ${yGrid}
+                    <path d="${confidencePath}" fill="none" stroke="#0d5bd7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="${tokenPath}" fill="none" stroke="#1a8f5a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+                    ${xAxis}
+                    <text x="${padding.left}" y="12" fill="#0d5bd7" font-size="11" font-weight="bold">Confidence</text>
+                    <text x="${padding.left + 90}" y="12" fill="#1a8f5a" font-size="11" font-weight="bold">Tokens</text>
+                </g>
+            `;
+        }
+
+        loadDashboard();
+    </script>
+</body>
+
+</html>
